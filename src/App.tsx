@@ -1,47 +1,24 @@
 import { useState, useEffect, FormEvent } from 'react';
-import {
-  Plus,
-  Trash2,
-  CheckCircle,
-  Circle,
-  ListTodo,
-  Tag,
-  Search,
-  Flag,
-  Calendar,
-  Edit2,
-  X,
-  Save,
-  EyeOff,
-  Eye,
-} from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, ListTodo, Tag, Search, Flag, Calendar, Edit2, X, Save, EyeOff, Eye } from 'lucide-react';
 
 // Importações necessárias para salvar dados na Nuvem (Firebase)
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
-import {
-  getFirestore,
-  collection,
-  query,
-  onSnapshot,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-} from 'firebase/firestore';
+import { getFirestore, collection, query, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
 // =========================================================================
 // COLE AQUI AS SUAS CHAVES DO FIREBASE (Substitua os valores entre aspas)
 // =========================================================================
 const firebaseConfig = {
-  apiKey: 'AIzaSyACL_MNmAaUTsITvAyeQWNJM6Tm8Yo8dHo',
-  authDomain: 'lista-de-tarefas-34c6e.firebaseapp.com',
-  projectId: 'lista-de-tarefas-34c6e',
-  storageBucket: 'lista-de-tarefas-34c6e.firebasestorage.app',
-  messagingSenderId: '410253926230',
-  appId: '1:410253926230:web:48c4ab934ce7c4a40dc0f7',
-  measurementId: 'G-5W417YJCG9',
+  apiKey: "AIzaSyACL_MNmAaUTsITvAyeQWNJM6Tm8Yo8dHo",
+  authDomain: "lista-de-tarefas-34c6e.firebaseapp.com",
+  projectId: "lista-de-tarefas-34c6e",
+  storageBucket: "lista-de-tarefas-34c6e.firebasestorage.app",
+  messagingSenderId: "410253926230",
+  appId: "1:410253926230:web:48c4ab934ce7c4a40dc0f7",
+  measurementId: "G-5W417YJCG9"
 };
+
 
 // Inicializando os serviços do Firebase
 const app = initializeApp(firebaseConfig);
@@ -69,59 +46,51 @@ const getTodayString = (): string => {
 // Helper: Formatar datas amigáveis (Hoje, Amanhã, Quinta, etc.)
 const formatFriendlyDate = (dateString?: string): string | null => {
   if (!dateString) return null;
-
+  
   const [year, month, day] = dateString.split('-');
   const taskDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
+  
   const diffTime = taskDate.getTime() - today.getTime();
   const diffDays = Math.round(diffTime / (1000 * 3600 * 24));
 
   if (diffDays === 0) return 'Hoje';
   if (diffDays === 1) return 'Amanhã';
   if (diffDays === -1) return 'Ontem';
-
+  
   if (diffDays > 1 && diffDays < 7) {
-    const days = [
-      'Domingo',
-      'Segunda',
-      'Terça',
-      'Quarta',
-      'Quinta',
-      'Sexta',
-      'Sábado',
-    ];
+    const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
     return days[taskDate.getDay()];
   }
-
+  
   return `${day}/${month}`;
 };
 
 // Definição das categorias e as suas respetivas cores
 const CATEGORIES: Record<string, string> = {
-  Geral: 'bg-slate-100 text-slate-700',
-  Academia: 'bg-green-100 text-green-700',
-  Contas: 'bg-red-100 text-red-700',
-  Trabalho: 'bg-purple-100 text-purple-700',
-  Casa: 'bg-orange-100 text-orange-700',
-  Estudos: 'bg-yellow-100 text-yellow-700',
+  'Geral': 'bg-slate-100 text-slate-700',
+  'Academia': 'bg-green-100 text-green-700',
+  'Contas': 'bg-red-100 text-red-700',
+  'Trabalho': 'bg-purple-100 text-purple-700',
+  'Casa': 'bg-orange-100 text-orange-700',
+  'Estudos': 'bg-yellow-100 text-yellow-700'
 };
 
 // Definição dos níveis de prioridade
 const PRIORITIES: Record<string, string> = {
-  Urgente: 'bg-red-100 text-red-800 border-red-200',
-  Importante: 'bg-orange-100 text-orange-800 border-orange-200',
-  Normal: 'bg-blue-100 text-blue-800 border-blue-200',
-  'No radar': 'bg-slate-100 text-slate-600 border-slate-200',
+  'Urgente': 'bg-red-100 text-red-800 border-red-200',
+  'Importante': 'bg-orange-100 text-orange-800 border-orange-200',
+  'Normal': 'bg-blue-100 text-blue-800 border-blue-200',
+  'No radar': 'bg-slate-100 text-slate-600 border-slate-200'
 };
 
 // Pesos para ordenação de prioridades (Maior = mais importante)
 const PRIORITY_WEIGHTS: Record<string, number> = {
-  Urgente: 4,
-  Importante: 3,
-  Normal: 2,
-  'No radar': 1,
+  'Urgente': 4,
+  'Importante': 3,
+  'Normal': 2,
+  'No radar': 1
 };
 
 export default function App() {
@@ -143,67 +112,58 @@ export default function App() {
 
   const loginWithGoogle = async () => {
     try {
-      const { GoogleAuthProvider, signInWithPopup } = await import(
-        'firebase/auth'
-      );
+      const { GoogleAuthProvider, signInWithPopup } = await import('firebase/auth');
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      alert(
-        'Erro ao fazer login. Verifique se ativou o Google Auth no Firebase.'
-      );
+      console.error("Erro ao fazer login:", error);
+      alert("Erro ao fazer login. Verifique se ativou o Google Auth no Firebase.");
     }
   };
 
   // 2. Carregar dados sincronizados da Nuvem
   useEffect(() => {
     if (!user) return;
-
+    
     const todosRef = collection(db, 'users', user.uid, 'todos');
     const q = query(todosRef);
-
+    
     // Tipagem explícita com 'any' para evitar erros de compilação rigorosos
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot: any) => {
-        const fetchedTodos: Todo[] = [];
-        snapshot.forEach((doc: any) => {
-          fetchedTodos.push({ id: doc.id, ...doc.data() } as Todo);
-        });
-        setTodos(fetchedTodos);
-      },
-      (error: any) => {
-        console.error('Erro ao sincronizar tarefas:', error);
-      }
-    );
-
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
+      const fetchedTodos: Todo[] = [];
+      snapshot.forEach((doc: any) => {
+        fetchedTodos.push({ id: doc.id, ...doc.data() } as Todo);
+      });
+      setTodos(fetchedTodos);
+    }, (error: any) => {
+      console.error("Erro ao sincronizar tarefas:", error);
+    });
+    
     return () => unsubscribe();
   }, [user]);
 
   // Lógica de Estatísticas Inteligentes (Foco Diário)
   const todayStr = getTodayString();
-  const todayTasks = todos.filter((t) => t.dueDate && t.dueDate <= todayStr);
+  const todayTasks = todos.filter(t => t.dueDate && t.dueDate <= todayStr);
   const hasTodayTasks = todayTasks.length > 0;
-
+  
   const statTasks = hasTodayTasks ? todayTasks : todos;
   const totalTasks = statTasks.length;
-  const completedTasks = statTasks.filter((t) => t.completed).length;
-  const completionRate =
-    totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+  const completedTasks = statTasks.filter(t => t.completed).length;
+  const completionRate = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
 
   // Submeter formulário (Adicionar ou Editar na Nuvem)
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || !user) return;
-
+    
     if (editingId) {
       const docRef = doc(db, 'users', user.uid, 'todos', editingId);
       await updateDoc(docRef, {
         text: inputValue,
         category: selectedCategory,
         priority: selectedPriority,
-        dueDate: selectedDate,
+        dueDate: selectedDate
       });
       setEditingId(null);
       setSelectedCategory('Geral');
@@ -216,10 +176,10 @@ export default function App() {
         category: selectedCategory,
         priority: selectedPriority,
         dueDate: selectedDate,
-        createdAt: Date.now(),
+        createdAt: Date.now()
       });
     }
-
+    
     setInputValue('');
     setSelectedDate('');
   };
@@ -243,7 +203,7 @@ export default function App() {
 
   const toggleTodo = async (id: string) => {
     if (!user) return;
-    const todo = todos.find((t) => t.id === id);
+    const todo = todos.find(t => t.id === id);
     if (todo) {
       const docRef = doc(db, 'users', user.uid, 'todos', id);
       await updateDoc(docRef, { completed: !todo.completed });
@@ -258,18 +218,14 @@ export default function App() {
 
   // Filtrar, Pesquisar e Ordenar tarefas
   const filteredAndSortedTodos = todos
-    .filter((todo) => {
-      if (
-        searchQuery &&
-        !todo.text.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-        return false;
+    .filter(todo => {
+      if (searchQuery && !todo.text.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       if (!showCompleted && todo.completed) return false;
       return true;
     })
     .sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
-
+      
       if (a.dueDate && b.dueDate) {
         const dateA = new Date(a.dueDate).getTime();
         const dateB = new Date(b.dueDate).getTime();
@@ -283,7 +239,7 @@ export default function App() {
       if (PRIORITY_WEIGHTS[a.priority] !== PRIORITY_WEIGHTS[b.priority]) {
         return PRIORITY_WEIGHTS[b.priority] - PRIORITY_WEIGHTS[a.priority];
       }
-
+      
       return (b.createdAt || 0) - (a.createdAt || 0);
     });
 
@@ -294,14 +250,9 @@ export default function App() {
           <div className="bg-[#552583] p-4 rounded-full text-[#FDB927] mb-6">
             <ListTodo size={48} />
           </div>
-          <h1 className="text-2xl font-bold text-[#552583] mb-2">
-            A Minha Lista de Tarefas
-          </h1>
-          <p className="text-slate-500 mb-8">
-            Faça login com o Google para sincronizar as suas tarefas entre o
-            telemóvel e o computador.
-          </p>
-          <button
+          <h1 className="text-2xl font-bold text-[#552583] mb-2">A Minha Lista de Tarefas</h1>
+          <p className="text-slate-500 mb-8">Faça login com o Google para sincronizar as suas tarefas entre o telemóvel e o computador.</p>
+          <button 
             onClick={loginWithGoogle}
             className="w-full bg-[#FDB927] hover:bg-[#e5a620] text-[#552583] font-bold py-4 px-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
           >
@@ -315,35 +266,34 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-[#552583]">
+        
         {/* Cabeçalho */}
         <div className="bg-[#552583] p-6 text-[#FDB927] flex items-center gap-3">
           <ListTodo size={28} />
           <h1 className="text-2xl font-bold">A Minha Lista de Tarefas</h1>
         </div>
-
+        
         <div className="p-6">
           {/* Estatísticas de Progresso Inteligente */}
           <div className="mb-6 bg-[#552583]/5 rounded-xl p-4 border border-[#552583]/10">
             <div className="flex justify-between items-end mb-3">
               <div>
                 <h2 className="text-sm font-bold text-[#552583] uppercase tracking-wider">
-                  {hasTodayTasks ? 'Foco de Hoje' : 'Progresso Geral'}
+                  {hasTodayTasks ? "Foco de Hoje" : "Progresso Geral"}
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  {hasTodayTasks
+                  {hasTodayTasks 
                     ? `${completedTasks} de ${totalTasks} tarefas para hoje concluídas`
-                    : totalTasks > 0
-                    ? `${completedTasks} de ${totalTasks} tarefas concluídas no total`
-                    : 'Adicione a sua primeira tarefa!'}
+                    : totalTasks > 0 
+                      ? `${completedTasks} de ${totalTasks} tarefas concluídas no total` 
+                      : 'Adicione a sua primeira tarefa!'}
                 </p>
               </div>
-              <span className="text-3xl font-black text-[#FDB927] drop-shadow-sm">
-                {completionRate}%
-              </span>
+              <span className="text-3xl font-black text-[#FDB927] drop-shadow-sm">{completionRate}%</span>
             </div>
             <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-              <div
-                className="bg-[#552583] h-2.5 rounded-full transition-all duration-500 ease-out"
+              <div 
+                className="bg-[#552583] h-2.5 rounded-full transition-all duration-500 ease-out" 
                 style={{ width: `${completionRate}%` }}
               ></div>
             </div>
@@ -351,10 +301,7 @@ export default function App() {
 
           {/* Barra de Pesquisa */}
           <div className="mb-6 relative">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#552583]/50"
-              size={20}
-            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#552583]/50" size={20} />
             <input
               type="text"
               value={searchQuery}
@@ -365,25 +312,13 @@ export default function App() {
           </div>
 
           {/* Formulário de adição/edição */}
-          <form
-            onSubmit={handleSubmit}
-            className={`mb-6 flex flex-col gap-3 p-4 rounded-xl border transition-all ${
-              editingId
-                ? 'bg-[#FDB927]/10 border-[#FDB927]'
-                : 'bg-slate-50 border-[#552583]/20'
-            }`}
-          >
+          <form onSubmit={handleSubmit} className={`mb-6 flex flex-col gap-3 p-4 rounded-xl border transition-all ${editingId ? 'bg-[#FDB927]/10 border-[#FDB927]' : 'bg-slate-50 border-[#552583]/20'}`}>
             {editingId && (
               <div className="flex justify-between items-center mb-1">
                 <span className="text-xs font-bold text-[#552583] uppercase tracking-wider flex items-center gap-1">
                   <Edit2 size={12} /> Editando Tarefa
                 </span>
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="text-slate-400 hover:text-red-500 transition-colors p-1 flex items-center gap-1"
-                  title="Cancelar edição"
-                >
+                <button type="button" onClick={cancelEdit} className="text-slate-400 hover:text-red-500 transition-colors p-1 flex items-center gap-1" title="Cancelar edição">
                   <span className="text-xs font-medium">Cancelar</span>
                   <X size={16} />
                 </button>
@@ -394,31 +329,23 @@ export default function App() {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder={
-                  editingId
-                    ? 'Atualizar nome da tarefa...'
-                    : 'O que precisa de ser feito?'
-                }
+                placeholder={editingId ? "Atualizar nome da tarefa..." : "O que precisa de ser feito?"}
                 className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FDB927] focus:border-[#552583] bg-white transition-all"
               />
-              <button
+              <button 
                 type="submit"
                 disabled={!inputValue.trim()}
-                className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center font-bold text-[#552583] ${
-                  editingId
-                    ? 'bg-green-400 hover:bg-green-500 disabled:bg-green-200 text-white'
-                    : 'bg-[#FDB927] hover:bg-[#e5a620] disabled:bg-[#FDB927]/50'
-                }`}
-                title={editingId ? 'Salvar alterações' : 'Adicionar tarefa'}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center justify-center font-bold text-[#552583] ${editingId ? 'bg-green-400 hover:bg-green-500 disabled:bg-green-200 text-white' : 'bg-[#FDB927] hover:bg-[#e5a620] disabled:bg-[#FDB927]/50'}`}
+                title={editingId ? "Salvar alterações" : "Adicionar tarefa"}
               >
                 {editingId ? <Save size={24} /> : <Plus size={24} />}
               </button>
             </div>
-
+            
             {/* Seleção de Categoria */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
               <Tag size={16} className="text-[#552583]/60 shrink-0" />
-              {Object.keys(CATEGORIES).map((cat) => (
+              {Object.keys(CATEGORIES).map(cat => (
                 <button
                   key={cat}
                   type="button"
@@ -437,7 +364,7 @@ export default function App() {
             {/* Seleção de Prioridade */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
               <Flag size={16} className="text-[#552583]/60 shrink-0" />
-              {Object.keys(PRIORITIES).map((pri) => (
+              {Object.keys(PRIORITIES).map(pri => (
                 <button
                   key={pri}
                   type="button"
@@ -456,15 +383,15 @@ export default function App() {
             {/* Seleção de Data */}
             <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#552583]/10">
               <Calendar size={16} className="text-[#552583]/60 shrink-0" />
-              <input
-                type="date"
+              <input 
+                type="date" 
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 className="text-xs px-3 py-1.5 border border-slate-200 rounded-lg text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#FDB927] focus:border-[#552583] bg-white cursor-pointer"
               />
               {selectedDate && (
-                <button
-                  type="button"
+                <button 
+                  type="button" 
                   onClick={() => setSelectedDate('')}
                   className="text-[10px] text-red-500 hover:text-red-700 font-medium ml-2"
                 >
@@ -480,97 +407,71 @@ export default function App() {
               <div className="text-center py-8 text-slate-400">
                 {searchQuery ? (
                   <p>Nenhuma tarefa encontrada com "{searchQuery}".</p>
-                ) : !showCompleted && todos.some((t) => t.completed) ? (
+                ) : !showCompleted && todos.some(t => t.completed) ? (
                   <div className="flex flex-col items-center gap-2">
                     <CheckCircle className="text-green-400" size={32} />
                     <p>Tudo limpo por aqui!</p>
-                    <button
-                      onClick={() => setShowCompleted(true)}
-                      className="text-xs text-[#552583] underline mt-2"
-                    >
+                    <button onClick={() => setShowCompleted(true)} className="text-xs text-[#552583] underline mt-2">
                       Mostrar tarefas concluídas
                     </button>
                   </div>
                 ) : (
                   <>
                     <p>Nenhuma tarefa por enquanto.</p>
-                    <p className="text-sm mt-1">
-                      Adicione uma acima para começar!
-                    </p>
+                    <p className="text-sm mt-1">Adicione uma acima para começar!</p>
                   </>
                 )}
               </div>
             ) : (
-              filteredAndSortedTodos.map((todo) => (
-                <div
+              filteredAndSortedTodos.map(todo => (
+                <div 
                   key={todo.id}
                   className={`flex items-center justify-between p-4 border rounded-xl transition-all ${
-                    todo.completed
-                      ? 'bg-slate-50 border-slate-100'
-                      : 'bg-white border-slate-200 hover:border-[#FDB927]'
+                    todo.completed ? 'bg-slate-50 border-slate-100' : 'bg-white border-slate-200 hover:border-[#FDB927]'
                   }`}
                 >
-                  <div
-                    className="flex items-center gap-3 flex-1 cursor-pointer"
+                  <div 
+                    className="flex items-center gap-3 flex-1 cursor-pointer" 
                     onClick={() => toggleTodo(todo.id)}
                   >
                     {todo.completed ? (
-                      <CheckCircle
-                        className="text-[#552583] shrink-0"
-                        size={24}
-                      />
+                      <CheckCircle className="text-[#552583] shrink-0" size={24} />
                     ) : (
                       <Circle className="text-slate-300 shrink-0" size={24} />
                     )}
                     <div className="flex flex-col gap-1">
-                      <span
-                        className={`text-slate-700 transition-all ${
-                          todo.completed
-                            ? 'line-through text-slate-400'
-                            : 'font-medium'
-                        }`}
-                      >
+                      <span className={`text-slate-700 transition-all ${
+                        todo.completed ? 'line-through text-slate-400' : 'font-medium'
+                      }`}>
                         {todo.text}
                       </span>
                       <div className="flex gap-2 items-center flex-wrap mt-0.5">
                         {todo.dueDate && (
-                          <span
-                            className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full w-fit font-bold tracking-wider border border-blue-200 bg-blue-50 text-blue-700 ${
-                              todo.completed ? 'opacity-50 grayscale' : ''
-                            }`}
-                          >
+                          <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full w-fit font-bold tracking-wider border border-blue-200 bg-blue-50 text-blue-700 ${todo.completed ? 'opacity-50 grayscale' : ''}`}>
                             <Calendar size={10} />
                             {formatFriendlyDate(todo.dueDate)}
                           </span>
                         )}
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full w-fit uppercase font-bold tracking-wider ${
-                            CATEGORIES[todo.category || 'Geral']
-                          } ${todo.completed ? 'opacity-50 grayscale' : ''}`}
-                        >
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full w-fit uppercase font-bold tracking-wider ${CATEGORIES[todo.category || 'Geral']} ${todo.completed ? 'opacity-50 grayscale' : ''}`}>
                           {todo.category || 'Geral'}
                         </span>
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full w-fit uppercase font-bold tracking-wider border ${
-                            PRIORITIES[todo.priority || 'Normal']
-                          } ${todo.completed ? 'opacity-50 grayscale' : ''}`}
-                        >
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full w-fit uppercase font-bold tracking-wider border ${PRIORITIES[todo.priority || 'Normal']} ${todo.completed ? 'opacity-50 grayscale' : ''}`}>
                           {todo.priority || 'Normal'}
                         </span>
                       </div>
                     </div>
                   </div>
-
+                  
                   {/* Botões de Ação */}
                   <div className="flex gap-1 shrink-0 ml-2">
-                    <button
+                    <button 
                       onClick={() => startEdit(todo)}
                       className="text-slate-300 hover:text-[#552583] transition-colors p-2 rounded-lg hover:bg-[#552583]/10"
                       title="Editar tarefa"
                     >
                       <Edit2 size={18} />
                     </button>
-                    <button
+                    <button 
                       onClick={() => deleteTodo(todo.id)}
                       className="text-slate-300 hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50"
                       title="Excluir tarefa permanentemente"
@@ -583,27 +484,21 @@ export default function App() {
             )}
           </div>
         </div>
-
+        
         {/* Rodapé Inteligente com Ocultar/Mostrar */}
         {todos.length > 0 && (
           <div className="bg-[#552583]/5 p-4 border-t border-[#552583]/10 flex justify-between items-center text-sm text-[#552583] font-medium">
-            <span>
-              {todos.filter((t) => !t.completed).length} pendentes no total
-            </span>
-
-            {todos.some((t) => t.completed) && (
-              <button
+            <span>{todos.filter(t => !t.completed).length} pendentes no total</span>
+            
+            {todos.some(t => t.completed) && (
+              <button 
                 onClick={() => setShowCompleted(!showCompleted)}
                 className="hover:text-[#FDB927] hover:bg-[#552583] px-3 py-1.5 rounded-md transition-colors flex items-center gap-2"
               >
                 {showCompleted ? (
-                  <>
-                    <EyeOff size={16} /> Ocultar concluídas
-                  </>
+                  <><EyeOff size={16} /> Ocultar concluídas</>
                 ) : (
-                  <>
-                    <Eye size={16} /> Mostrar concluídas
-                  </>
+                  <><Eye size={16} /> Mostrar concluídas</>
                 )}
               </button>
             )}
