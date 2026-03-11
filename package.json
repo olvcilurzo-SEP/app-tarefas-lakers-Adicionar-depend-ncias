@@ -12,7 +12,7 @@
   "dependencies": {
     "react": "^19.2.4",
     "firebase": "^10.0.0",
-    "lucide-react": "^0.260.0",
+    "lucide-react": "^latest",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
